@@ -21,10 +21,12 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
 
-        //
+        Gate::guessPolicyNamesUsing(function ($modelClass){
+            return 'App\\Policies\\'.class_basename($modelClass).'Policy';
+        });
     }
 }

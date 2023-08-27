@@ -13,6 +13,18 @@ use Illuminate\Validation\ValidationException;
 
 class UsersController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth', [
+           'except'=>['show', 'create', 'store']
+        ]);
+
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     public function create(): Factory|View|Application
     {
         return view('users.create');
@@ -28,7 +40,7 @@ class UsersController extends Controller
      * @return RedirectResponse
      * @throws ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $this->validate($request, [
             'name'     => 'required|unique:users|max:50',
@@ -48,21 +60,23 @@ class UsersController extends Controller
     }
 
 
-    public function edit(User $user)
+    public function edit(User $user): Factory|View|Application
     {
+        $this->authorize('update', $user);
         return view('users.edit', compact('user'));
     }
 
-    public function update(User $user, Request $request)
+    public function update(User $user, Request $request): RedirectResponse
     {
+        $this->authorize('update', $user);
         $this->validate($request, [
-           'name'=>'required|max:50',
-           'password' => 'nullable|confirmed|min:6'
+            'name'     => 'required|max:50',
+            'password' => 'nullable|confirmed|min:6'
         ]);
 
         $data = [];
         $data['name'] = $request->name;
-        if ($request->password){
+        if ($request->password) {
             $data['password'] = bcrypt($request->password);
         }
 
