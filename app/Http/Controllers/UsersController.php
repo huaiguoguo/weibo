@@ -31,7 +31,7 @@ class UsersController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(): Factory|View|Application
     {
         $users = User::paginate(10);
         return view('users.index', compact('users'));
@@ -44,7 +44,8 @@ class UsersController extends Controller
 
     public function show(User $user): Factory|View|Application
     {
-        return view('users.show', compact('user'));
+        $statuses = $user->statuses()->orderBy('created_at', 'desc')->paginate(30);
+        return view('users.show', compact('user', 'statuses'));
     }
 
     /**
@@ -102,7 +103,7 @@ class UsersController extends Controller
     }
 
 
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
         $this->authorize('destroy', $user);
         $user->delete();
